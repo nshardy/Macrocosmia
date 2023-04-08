@@ -6,6 +6,7 @@ import javax.swing.JPanel
 import javax.swing.UIManager
 import kotlin.system.exitProcess
 
+
 // variables
 var width : Int = 600
 var height : Int = 400
@@ -15,7 +16,6 @@ val singlePlayerPanel = JPanel()
 val multiplayerPanel = JPanel()
 val icon : Image = ImageIO.read(File("src/main/resources/sprites/Icon.png"))
 
-
 // functions
 fun main() {
 	// variables
@@ -23,11 +23,24 @@ fun main() {
 	window.size = Dimension(width , height)
 	window.iconImage = icon.getScaledInstance(64 , 64 , Image.SCALE_SMOOTH)
 
-	Taskbar.getTaskbar().iconImage =
-		when {
-			Taskbar.isTaskbarSupported() -> icon.getScaledInstance(64 , 64 , Image.SCALE_SMOOTH)
-			else                         -> null
+//	if (Taskbar.isTaskbarSupported())
+//		Taskbar.getTaskbar().iconImage = icon.getScaledInstance(64 , 64 , Image.SCALE_SMOOTH)
+
+	try {
+		window.iconImage = icon.getScaledInstance(64 , 64 , Image.SCALE_SMOOTH)
+		if (System.getProperty("os.name").startsWith("Mac") || System.getProperty("os.name").startsWith("Darwin")) {
+			val taskbar = Taskbar.getTaskbar()
+			try {
+				taskbar.iconImage = icon.getScaledInstance(64 , 64 , Image.SCALE_SMOOTH)
+			} catch (e : UnsupportedOperationException) {
+				println("Can't set taskbar icon.")
+			} catch (e : SecurityException) {
+				println("Warning. Can't set taskbar icon due to security exceptions.")
+			}
 		}
+	} catch (e : NullPointerException) {
+		e.printStackTrace()
+	}
 
 	UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
 

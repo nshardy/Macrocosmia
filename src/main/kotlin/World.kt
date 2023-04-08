@@ -1,3 +1,5 @@
+import kotlin.io.path.Path
+
 class World {
 	var worldName : String = "HelloWorld"
 
@@ -21,6 +23,17 @@ class World {
 
 	fun saveWorld() {
 		// TODO: saving not working
+		println(System.getProperty("os.name"))
+		println(System.getProperty("user.home") + "\\Documents")
+
+		var path : String = ""
+		val osName : String = System.getProperty("os.name")
+		if (osName.contains("Windows"))
+			path = System.getProperty("user.home") + "\\Documents\\"
+//		else if (osName.contains("Mac"))
+//			path = System.getProperty("user.home")
+
+		print(Path(path))
 
 //		val worldSaves = "~/Library/Application Support/org.example/worlds/"
 //		val files = Path(worldSaves)
