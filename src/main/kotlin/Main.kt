@@ -8,34 +8,35 @@ import kotlin.system.exitProcess
 
 
 // variables
-var width : Int = 600
-var height : Int = 400
+var width : Int = 700
+var height : Int = 550
 val window = JFrame()
 val mainMenuPanel = JPanel()
 val singlePlayerPanel = JPanel()
+val worldPanel = JPanel()
 val multiplayerPanel = JPanel()
 val icon : Image = ImageIO.read(File("src/main/resources/sprites/Icon.png"))
+val scaledIcon : Image = icon.getScaledInstance(128 , 128 , Image.SCALE_SMOOTH)
+var world : World = World()
+
 
 // functions
 fun main() {
 	// variables
 	window.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
 	window.size = Dimension(width , height)
-	window.iconImage = icon.getScaledInstance(64 , 64 , Image.SCALE_SMOOTH)
-
-//	if (Taskbar.isTaskbarSupported())
-//		Taskbar.getTaskbar().iconImage = icon.getScaledInstance(64 , 64 , Image.SCALE_SMOOTH)
+	window.iconImage = scaledIcon
 
 	try {
-		window.iconImage = icon.getScaledInstance(64 , 64 , Image.SCALE_SMOOTH)
+		window.iconImage = scaledIcon
 		if (System.getProperty("os.name").startsWith("Mac") || System.getProperty("os.name").startsWith("Darwin")) {
 			val taskbar = Taskbar.getTaskbar()
 			try {
-				taskbar.iconImage = icon.getScaledInstance(64 , 64 , Image.SCALE_SMOOTH)
+				taskbar.iconImage = scaledIcon
 			} catch (e : UnsupportedOperationException) {
 				println("Can't set taskbar icon.")
 			} catch (e : SecurityException) {
-				println("Warning. Can't set taskbar icon due to security exceptions.")
+				println("WARNING! Can't set taskbar icon due to security exceptions.")
 			}
 		}
 	} catch (e : NullPointerException) {
@@ -48,7 +49,30 @@ fun main() {
 	val mainMenuConstraints = GridBagConstraints()
 	mainMenuPanel.layout = mainMenuGridBag
 
-	// mainMenu items
+	createMainMenuPanel(mainMenuConstraints)
+	createSinglePlayerPanel()
+	createMultiplayerPanel()
+
+
+	toggleMenuPanels(mmPanel = true , spPanel = false , mpPanel = false)
+	window.setLocationRelativeTo(null)
+	window.isVisible = true
+}
+
+private fun createMultiplayerPanel() {
+	val multiplayerGridBag = GridBagLayout()
+	val multiplayerConstraints = GridBagConstraints()
+	multiplayerPanel.layout = multiplayerGridBag
+
+	val backFromMp = Button("Back")
+	backFromMp.addActionListener { toggleMenuPanels(mmPanel = true , spPanel = false , mpPanel = false) }
+	backFromMp.size = Dimension(60 , 30)
+	multiplayerConstraints.gridx = 1
+	multiplayerConstraints.gridy = 2
+	multiplayerPanel.add(backFromMp , multiplayerConstraints)
+}
+
+private fun createMainMenuPanel(mainMenuConstraints : GridBagConstraints) {
 	val title = Label("Macrocosmia: A New Dawn")
 	title.font = Font("Monospace" , Font.PLAIN , 24)
 	mainMenuConstraints.insets = Insets(0 , 0 , 100 , 0)
@@ -75,8 +99,9 @@ fun main() {
 	mainMenuConstraints.gridx = 1
 	mainMenuConstraints.gridy = 3
 	mainMenuPanel.add(exit , mainMenuConstraints)
+}
 
-	// singlePlayer menu
+private fun createSinglePlayerPanel() {
 	val singlePlayerGridBag = GridBagLayout()
 	val singlePlayerConstraints = GridBagConstraints()
 	singlePlayerPanel.layout = singlePlayerGridBag
@@ -84,51 +109,127 @@ fun main() {
 	val worldsTitle = Label("Worlds")
 	worldsTitle.font = Font("Monospace" , Font.PLAIN , 24)
 	singlePlayerConstraints.insets = Insets(0 , 0 , 150 , 0)
-	singlePlayerConstraints.gridx = 1
+	singlePlayerConstraints.gridx = 0
 	singlePlayerConstraints.gridy = 0
 	singlePlayerPanel.add(worldsTitle , singlePlayerConstraints)
 
+
+	createWorldPanel()
+	singlePlayerConstraints.insets = Insets(0 , 0 , 0 , 0)
+	singlePlayerConstraints.gridx = 0
+	singlePlayerConstraints.gridy = 1
+	singlePlayerPanel.add(worldPanel , singlePlayerConstraints)
+
+
 	val createWorld = Button("Create World")
 	createWorld.addActionListener {
-		var world = World()
 		world.startNewWorld()
 		world.saveWorld()
-		/*JOptionPane.showMessageDialog(window , "Creating worlds is not yet implemented.")*/
 	}
 	singlePlayerConstraints.insets = Insets(0 , 0 , 0 , 0)
-	singlePlayerConstraints.gridx = 1
-	singlePlayerConstraints.gridy = 1
+	singlePlayerConstraints.gridx = 0
+	singlePlayerConstraints.gridy = 2
 	singlePlayerPanel.add(createWorld , singlePlayerConstraints)
 
 	val back = Button("Back")
 	back.addActionListener { toggleMenuPanels(mmPanel = true , spPanel = false , mpPanel = false) }
 	back.size = Dimension(60 , 30)
-	singlePlayerConstraints.gridx = 1
-	singlePlayerConstraints.gridy = 2
+	singlePlayerConstraints.gridx = 0
+	singlePlayerConstraints.gridy = 3
 	singlePlayerPanel.add(back , singlePlayerConstraints)
+}
 
-	// multiplayerPanel menu
-	val multiplayerGridBag = GridBagLayout()
-	val multiplayerConstraints = GridBagConstraints()
-	multiplayerPanel.layout = multiplayerGridBag
-
-	val backFromMp = Button("Back")
-	backFromMp.addActionListener { toggleMenuPanels(mmPanel = true , spPanel = false , mpPanel = false) }
-	backFromMp.size = Dimension(60 , 30)
-	multiplayerConstraints.gridx = 1
-	multiplayerConstraints.gridy = 2
-	multiplayerPanel.add(backFromMp , multiplayerConstraints)
+private fun createWorldPanel() {
+	// world creation
+	val worldCreateGridBag = GridBagLayout()
+	val worldCreateConstraints = GridBagConstraints()
+	worldPanel.layout = worldCreateGridBag
 
 
-	toggleMenuPanels(mmPanel = true , spPanel = false , mpPanel = false)
-	window.setLocationRelativeTo(null)
-	window.isVisible = true
-	validate()
+	val worldSeedLabel = Label("World Seed:")
+	worldCreateConstraints.gridx = 3
+	worldPanel.add(worldSeedLabel , worldCreateConstraints)
 
+	val worldSeedInput = TextField("1000000000")
+	worldCreateConstraints.gridx = 4
+	worldSeedInput.text = "${(Math.random() * 1000000000).toInt()}"
+	world.setSeed(worldSeedInput)
+	worldSeedInput.addTextListener { world.setSeed(worldSeedInput) }
+	worldPanel.add(worldSeedInput , worldCreateConstraints)
+
+	val worldNameLabel = Label("World Name:")
+	worldCreateConstraints.gridx = 0
+	worldPanel.add(worldNameLabel , worldCreateConstraints)
+
+	val worldNameInput = TextField("Name of World...")
+	world.setName(worldNameInput)
+	worldNameInput.addTextListener { world.setName(worldNameInput) }
+	worldCreateConstraints.gridx = 1
+	worldPanel.add(worldNameInput , worldCreateConstraints)
+
+	val worldDifficultyLabel = Label("World Difficulty:")
+	worldCreateConstraints.gridx = 0
+	worldCreateConstraints.gridy = 1
+	worldPanel.add(worldDifficultyLabel , worldCreateConstraints)
+
+	val worldDifficultyLowest = Button("Nomad")
+	worldDifficultyLowest.addActionListener { world.setDifficulty(worldDifficultyLowest) }
+	worldCreateConstraints.gridx = 1
+	worldPanel.add(worldDifficultyLowest , worldCreateConstraints)
+
+	val worldDifficultyLow = Button("Serene")
+	worldDifficultyLow.addActionListener { world.setDifficulty(worldDifficultyLow) }
+	worldCreateConstraints.gridx = 2
+	worldPanel.add(worldDifficultyLow , worldCreateConstraints)
+
+	val worldDifficultyMedium = Button("Grim")
+	worldDifficultyMedium.addActionListener { world.setDifficulty(worldDifficultyMedium) }
+	worldCreateConstraints.gridx = 3
+	worldPanel.add(worldDifficultyMedium , worldCreateConstraints)
+
+	val worldDifficultyHigh = Button("Insufferable")
+	worldDifficultyHigh.addActionListener { world.setDifficulty(worldDifficultyHigh) }
+	worldCreateConstraints.gridx = 4
+	worldPanel.add(worldDifficultyHigh , worldCreateConstraints)
+
+	val worldDifficultyTooHigh = Button("Legendary")
+	worldDifficultyTooHigh.addActionListener { world.setDifficulty(worldDifficultyTooHigh) }
+	worldCreateConstraints.gridx = 5
+	worldPanel.add(worldDifficultyTooHigh , worldCreateConstraints)
+
+
+	val worldPowerLabel = Label("World Power:")
+	worldCreateConstraints.gridx = 0
+	worldCreateConstraints.gridy = 3
+	worldPanel.add(worldPowerLabel , worldCreateConstraints)
+	val worldPowerFear = Button("Fear")
+	worldPowerFear.addActionListener { world.setPower(worldPowerFear) }
+	worldCreateConstraints.gridx = 1
+	worldPanel.add(worldPowerFear , worldCreateConstraints)
+	val worldPowerDesperation = Button("Desperation")
+	worldPowerDesperation.addActionListener { world.setPower(worldPowerDesperation) }
+	worldCreateConstraints.gridx = 2
+	worldPanel.add(worldPowerDesperation , worldCreateConstraints)
+
+	val worldSizeLabel = Label("World Size:")
+	worldCreateConstraints.gridx = 0
+	worldCreateConstraints.gridy = 2
+	worldPanel.add(worldSizeLabel , worldCreateConstraints)
+	val worldSizeSmall = Button("Small")
+	worldSizeSmall.addActionListener { world.setSize(worldSizeSmall) }
+	worldCreateConstraints.gridx = 1
+	worldPanel.add(worldSizeSmall , worldCreateConstraints)
+	val worldSizeMedium = Button("Medium")
+	worldSizeMedium.addActionListener { world.setSize(worldSizeMedium) }
+	worldCreateConstraints.gridx = 2
+	worldPanel.add(worldSizeMedium , worldCreateConstraints)
+	val worldSizeLarge = Button("Large")
+	worldSizeLarge.addActionListener { world.setSize(worldSizeLarge) }
+	worldCreateConstraints.gridx = 3
+	worldPanel.add(worldSizeLarge , worldCreateConstraints)
 }
 
 fun toggleMenuPanels(mmPanel : Boolean , spPanel : Boolean , mpPanel : Boolean) {
-
 	when {
 		! mmPanel -> window.remove(mainMenuPanel)
 		mmPanel   -> window.add(mainMenuPanel)
