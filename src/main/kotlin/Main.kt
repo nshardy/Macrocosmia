@@ -123,7 +123,6 @@ private fun createSinglePlayerPanel() {
 
 	val createWorld = Button("Create World")
 	createWorld.addActionListener {
-		world.startNewWorld()
 		world.saveWorld()
 	}
 	singlePlayerConstraints.insets = Insets(0 , 0 , 0 , 0)

@@ -2,17 +2,22 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.awt.Button
 import java.awt.TextField
+import java.io.FileReader
 import java.io.FileWriter
 import java.io.PrintWriter
 import java.nio.charset.Charset
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import javax.swing.JOptionPane
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 
 class World {
+	// variables
 	var worldName : String = ""
+	var worldSeed : String = ""
+	var intWorldSeed : Int = 0
 
 	enum class worldPower { Fear , Desperation }
 	enum class worldSize { Small , Medium , Large }
@@ -21,21 +26,26 @@ class World {
 	var WorldPower : worldPower = worldPower.Fear
 	var WorldSize : worldSize = worldSize.Small
 	var WorldDifficulty : worldDifficulty = worldDifficulty.Nomad
-	var intWorldSeed : Int = 0
-	var worldSeed : String = ""
 
 
-	// worldSeed = "${worldPower}.${worldSize}.${worldDifficulty}.${intWorldSeed}"
-	fun startNewWorld() {
-		var world = this
-		if (intWorldSeed == 0)
-			intWorldSeed = (Math.random() * 1000000000).toInt()
-		worldSeed = "${WorldPower.ordinal}.${WorldSize.ordinal}.${WorldDifficulty.ordinal}.${intWorldSeed}"
+	// functions
+	fun loadWorld(worldToLoad : String) {
+		val file = FileReader("${getPath()}/${worldToLoad}.json").readText()
+		val json = JSONObject(file)
+	}
+
+	private fun getPath() : String {
+		val osName : String = System.getProperty("os.name")
+		when {
+			osName.contains("Windows") -> return System.getProperty("user.home") + "\\Documents\\Macrocosmia\\worlds"
+			osName.contains("Mac")     -> return System.getProperty("user.home") + "/Documents/Macrocosmia/worlds"
+		}
+		return ""
 	}
 
 	fun saveWorld() {
-		var path = ""
-		val osName = System.getProperty("os.name")
+		var path : String = ""
+		val osName : String = System.getProperty("os.name")
 		when {
 			osName.contains("Windows") -> path = System.getProperty("user.home") + "\\Documents\\"
 			osName.contains("Mac")     -> path = System.getProperty("user.home") + "/Documents/"
@@ -43,24 +53,37 @@ class World {
 
 
 		// getting the saves folder
-		val files = Path(path + "Macrocosmia/worlds/")
+		val files : Path = Path(path + "Macrocosmia/worlds/")
 		if (! files.exists())
-			Files.createDirectories(Paths.get("$path/Macrocosmia/worlds/"))
+			Files.createDirectories(
+				Paths.get("$path/Macrocosmia/worlds/")
+			)
 		val worldSaves = path + "Macrocosmia/worlds/"
 
 
-		// world to save
+		// creating the json
 		val json = JSONObject()
 		try {
-			json.put("name" , worldName)
-			json.put("power" , WorldPower)
-			json.put("size" , WorldSize)
-			json.put("difficulty" , WorldDifficulty)
-			json.put("seed" , "${WorldPower.ordinal}.${WorldSize.ordinal}.${WorldDifficulty.ordinal}.${intWorldSeed}")
+			json.run {
+				put("name" , worldName)
+				put("power" , WorldPower)
+				put("size" , WorldSize)
+				put("difficulty" , WorldDifficulty)
+				put(
+					"seed" ,
+					"${WorldPower.ordinal}.${WorldSize.ordinal}.${WorldDifficulty.ordinal}.${
+						if (intWorldSeed == 0)
+							intWorldSeed = (Math.random() * 1000000000).toInt()
+						else
+							intWorldSeed
+					}"
+				)
+			}
 		} catch (e : JSONException) {
 			e.printStackTrace()
 		}
 
+		// creating the file
 		try {
 			PrintWriter(
 				FileWriter(
@@ -76,6 +99,7 @@ class World {
 			e.printStackTrace()
 		}
 
+		loadWorld(worldName)
 	}
 
 	fun setDifficulty(button : Button) {
@@ -104,16 +128,18 @@ class World {
 	}
 
 	fun setSeed(textField : TextField) {
-		val regex = Regex("[^0-9]")
+		val regex = Regex(pattern = "0-9")
 		val result = regex.replace(textField.text , "")
 
-		intWorldSeed = result.toInt(); textField.text = result
+		this.intWorldSeed = result.toInt()
+		textField.text = result
 	}
 
 	fun setName(textField : TextField) {
-		val regex = Regex("a-zA-Z0-9\\s")
+		val regex = Regex(pattern = "A-Za-z0-9\\s")
 		val result = regex.replace(textField.text , "")
 
-		worldName = result; textField.text = result
+		worldName = result
+		textField.text = result
 	}
 }
