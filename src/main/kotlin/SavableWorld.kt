@@ -13,7 +13,7 @@ import javax.swing.JOptionPane
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 
-class World {
+class SavableWorld {
 	// variables
 	var worldName : String = ""
 	var worldSeed : String = ""
@@ -31,7 +31,20 @@ class World {
 	// functions
 	fun loadWorld(worldToLoad : String) {
 		val file = FileReader("${getPath()}/${worldToLoad}.json").readText()
-		val json = JSONObject(file)
+		val saveFile : JSONObject = JSONObject(file)
+
+		val name = saveFile.getString("name")
+		println(name)
+		val power = saveFile.getString("power")
+		println(power)
+		val size = saveFile.getString("size")
+		println(size)
+		val difficulty = saveFile.getString("difficulty")
+		println(difficulty)
+		val seed = saveFile.getString("seed")
+		println(seed)
+		val intSeed = seed.slice(IntRange(6 , seed.length - 1))
+		println(intSeed)
 	}
 
 	private fun getPath() : String {
@@ -93,7 +106,7 @@ class World {
 			).use { it.write(json.toString(2)) }
 			JOptionPane.showMessageDialog(
 				window ,
-				"World created!\nName: [$worldName]\nLocation: $worldSaves$worldName.json\""
+				"SavableWorld created!\nName: [$worldName]\nLocation: $worldSaves$worldName.json\""
 			)
 		} catch (e : Exception) {
 			e.printStackTrace()

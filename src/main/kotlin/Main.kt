@@ -17,7 +17,7 @@ val worldPanel = JPanel()
 val multiplayerPanel = JPanel()
 val icon : Image = ImageIO.read(File("src/main/resources/sprites/Icon.png"))
 val scaledIcon : Image = icon.getScaledInstance(128 , 128 , Image.SCALE_SMOOTH)
-var world : World = World()
+var savableWorld : SavableWorld = SavableWorld()
 
 
 // functions
@@ -123,7 +123,7 @@ private fun createSinglePlayerPanel() {
 
 	val createWorld = Button("Create World")
 	createWorld.addActionListener {
-		world.saveWorld()
+		savableWorld.saveWorld()
 	}
 	singlePlayerConstraints.insets = Insets(0 , 0 , 0 , 0)
 	singlePlayerConstraints.gridx = 0
@@ -139,7 +139,7 @@ private fun createSinglePlayerPanel() {
 }
 
 private fun createWorldPanel() {
-	// world creation
+	// savableWorld creation
 	val worldCreateGridBag = GridBagLayout()
 	val worldCreateConstraints = GridBagConstraints()
 	worldPanel.layout = worldCreateGridBag
@@ -152,8 +152,8 @@ private fun createWorldPanel() {
 	val worldSeedInput = TextField("1000000000")
 	worldCreateConstraints.gridx = 4
 	worldSeedInput.text = "${(Math.random() * 1000000000).toInt()}"
-	world.setSeed(worldSeedInput)
-	worldSeedInput.addTextListener { world.setSeed(worldSeedInput) }
+	savableWorld.setSeed(worldSeedInput)
+	worldSeedInput.addTextListener { savableWorld.setSeed(worldSeedInput) }
 	worldPanel.add(worldSeedInput , worldCreateConstraints)
 
 	val worldNameLabel = Label("World Name:")
@@ -161,8 +161,8 @@ private fun createWorldPanel() {
 	worldPanel.add(worldNameLabel , worldCreateConstraints)
 
 	val worldNameInput = TextField("Name of World...")
-	world.setName(worldNameInput)
-	worldNameInput.addTextListener { world.setName(worldNameInput) }
+	savableWorld.setName(worldNameInput)
+	worldNameInput.addTextListener { savableWorld.setName(worldNameInput) }
 	worldCreateConstraints.gridx = 1
 	worldPanel.add(worldNameInput , worldCreateConstraints)
 
@@ -172,27 +172,27 @@ private fun createWorldPanel() {
 	worldPanel.add(worldDifficultyLabel , worldCreateConstraints)
 
 	val worldDifficultyLowest = Button("Nomad")
-	worldDifficultyLowest.addActionListener { world.setDifficulty(worldDifficultyLowest) }
+	worldDifficultyLowest.addActionListener { savableWorld.setDifficulty(worldDifficultyLowest) }
 	worldCreateConstraints.gridx = 1
 	worldPanel.add(worldDifficultyLowest , worldCreateConstraints)
 
 	val worldDifficultyLow = Button("Serene")
-	worldDifficultyLow.addActionListener { world.setDifficulty(worldDifficultyLow) }
+	worldDifficultyLow.addActionListener { savableWorld.setDifficulty(worldDifficultyLow) }
 	worldCreateConstraints.gridx = 2
 	worldPanel.add(worldDifficultyLow , worldCreateConstraints)
 
 	val worldDifficultyMedium = Button("Grim")
-	worldDifficultyMedium.addActionListener { world.setDifficulty(worldDifficultyMedium) }
+	worldDifficultyMedium.addActionListener { savableWorld.setDifficulty(worldDifficultyMedium) }
 	worldCreateConstraints.gridx = 3
 	worldPanel.add(worldDifficultyMedium , worldCreateConstraints)
 
 	val worldDifficultyHigh = Button("Insufferable")
-	worldDifficultyHigh.addActionListener { world.setDifficulty(worldDifficultyHigh) }
+	worldDifficultyHigh.addActionListener { savableWorld.setDifficulty(worldDifficultyHigh) }
 	worldCreateConstraints.gridx = 4
 	worldPanel.add(worldDifficultyHigh , worldCreateConstraints)
 
 	val worldDifficultyTooHigh = Button("Legendary")
-	worldDifficultyTooHigh.addActionListener { world.setDifficulty(worldDifficultyTooHigh) }
+	worldDifficultyTooHigh.addActionListener { savableWorld.setDifficulty(worldDifficultyTooHigh) }
 	worldCreateConstraints.gridx = 5
 	worldPanel.add(worldDifficultyTooHigh , worldCreateConstraints)
 
@@ -202,11 +202,11 @@ private fun createWorldPanel() {
 	worldCreateConstraints.gridy = 3
 	worldPanel.add(worldPowerLabel , worldCreateConstraints)
 	val worldPowerFear = Button("Fear")
-	worldPowerFear.addActionListener { world.setPower(worldPowerFear) }
+	worldPowerFear.addActionListener { savableWorld.setPower(worldPowerFear) }
 	worldCreateConstraints.gridx = 1
 	worldPanel.add(worldPowerFear , worldCreateConstraints)
 	val worldPowerDesperation = Button("Desperation")
-	worldPowerDesperation.addActionListener { world.setPower(worldPowerDesperation) }
+	worldPowerDesperation.addActionListener { savableWorld.setPower(worldPowerDesperation) }
 	worldCreateConstraints.gridx = 2
 	worldPanel.add(worldPowerDesperation , worldCreateConstraints)
 
@@ -215,15 +215,15 @@ private fun createWorldPanel() {
 	worldCreateConstraints.gridy = 2
 	worldPanel.add(worldSizeLabel , worldCreateConstraints)
 	val worldSizeSmall = Button("Small")
-	worldSizeSmall.addActionListener { world.setSize(worldSizeSmall) }
+	worldSizeSmall.addActionListener { savableWorld.setSize(worldSizeSmall) }
 	worldCreateConstraints.gridx = 1
 	worldPanel.add(worldSizeSmall , worldCreateConstraints)
 	val worldSizeMedium = Button("Medium")
-	worldSizeMedium.addActionListener { world.setSize(worldSizeMedium) }
+	worldSizeMedium.addActionListener { savableWorld.setSize(worldSizeMedium) }
 	worldCreateConstraints.gridx = 2
 	worldPanel.add(worldSizeMedium , worldCreateConstraints)
 	val worldSizeLarge = Button("Large")
-	worldSizeLarge.addActionListener { world.setSize(worldSizeLarge) }
+	worldSizeLarge.addActionListener { savableWorld.setSize(worldSizeLarge) }
 	worldCreateConstraints.gridx = 3
 	worldPanel.add(worldSizeLarge , worldCreateConstraints)
 }
