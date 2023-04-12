@@ -6,12 +6,7 @@ import java.io.FileReader
 import java.io.FileWriter
 import java.io.PrintWriter
 import java.nio.charset.Charset
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 import javax.swing.JOptionPane
-import kotlin.io.path.Path
-import kotlin.io.path.exists
 
 class SavableWorld {
 	// variables
@@ -47,31 +42,17 @@ class SavableWorld {
 		println(intSeed)
 	}
 
-	private fun getPath() : String {
+	fun getPath() : String {
 		val osName : String = System.getProperty("os.name")
 		when {
-			osName.contains("Windows") -> return System.getProperty("user.home") + "\\Documents\\Macrocosmia\\worlds"
-			osName.contains("Mac")     -> return System.getProperty("user.home") + "/Documents/Macrocosmia/worlds"
+			osName.contains("Windows") -> return System.getProperty("user.home") + "\\Documents\\Macrocosmia\\worlds\\"
+			osName.contains("Mac")     -> return System.getProperty("user.home") + "/Documents/Macrocosmia/worlds/"
 		}
 		return ""
 	}
 
 	fun saveWorld() {
-		var path : String = ""
-		val osName : String = System.getProperty("os.name")
-		when {
-			osName.contains("Windows") -> path = System.getProperty("user.home") + "\\Documents\\"
-			osName.contains("Mac")     -> path = System.getProperty("user.home") + "/Documents/"
-		}
-
-
-		// getting the saves folder
-		val files : Path = Path(path + "Macrocosmia/worlds/")
-		if (! files.exists())
-			Files.createDirectories(
-				Paths.get("$path/Macrocosmia/worlds/")
-			)
-		val worldSaves = path + "Macrocosmia/worlds/"
+		var path : String = getPath()
 
 
 		// creating the json
@@ -85,10 +66,7 @@ class SavableWorld {
 				put(
 					"seed" ,
 					"${WorldPower.ordinal}.${WorldSize.ordinal}.${WorldDifficulty.ordinal}.${
-						if (intWorldSeed == 0)
-							intWorldSeed = (Math.random() * 1000000000).toInt()
-						else
-							intWorldSeed
+						if (intWorldSeed == 0) (Math.random() * 1000000000).toInt() else intWorldSeed
 					}"
 				)
 			}
@@ -100,13 +78,13 @@ class SavableWorld {
 		try {
 			PrintWriter(
 				FileWriter(
-					"$worldSaves$worldName.json" ,
+					"$path$worldName.json" ,
 					Charset.defaultCharset()
 				)
 			).use { it.write(json.toString(2)) }
 			JOptionPane.showMessageDialog(
 				window ,
-				"SavableWorld created!\nName: [$worldName]\nLocation: $worldSaves$worldName.json\""
+				"SavableWorld created!\nName: [$worldName]\nLocation: $path$worldName.json\""
 			)
 		} catch (e : Exception) {
 			e.printStackTrace()
