@@ -13,11 +13,10 @@ import kotlin.system.exitProcess
 var width : Int = 700
 var height : Int = 550
 val window : JFrame = JFrame()
-val mainMenuPanel  : JPanel = JPanel()
-val singlePlayerPanel  : JPanel = JPanel()
-val createWorldPanel  : JPanel = JPanel()
+val mainMenuPanel : JPanel = JPanel()
+val singlePlayerPanel : JPanel = JPanel()
+val createWorldPanel : JPanel = JPanel()
 val allWorldsPanel : ScrollPane = ScrollPane()
-val oneWorldPanel  : JPanel = JPanel()
 val multiplayerPanel : JPanel = JPanel()
 val icon : Image = ImageIO.read(File("src/main/resources/sprites/Icon.png"))
 val scaledIcon : Image = icon.getScaledInstance(128 , 128 , Image.SCALE_SMOOTH)
@@ -53,37 +52,19 @@ fun main() {
 	val mainMenuConstraints = GridBagConstraints()
 	mainMenuPanel.layout = mainMenuGridBag
 
-	createMainMenuPanel(mainMenuConstraints)
-	createSinglePlayerPanel()
-	createMultiplayerPanel()
-	createWorldPanel()
+	panelCreateMainMenu(mainMenuConstraints)
+	panelCreateSinglePlayer()
+	panelCreateMultiplayer()
+	panelCreateNewWorld()
 
+	allWorldsPanel.size = Dimension(400 , 300)
 
 	toggleMenuPanels(mmPanel = true , spPanel = false , mpPanel = false , cwPanel = false , awPanel = false)
 	window.setLocationRelativeTo(null)
 	window.isVisible = true
 }
 
-private fun createMultiplayerPanel() {
-	val multiplayerGridBag = GridBagLayout()
-	val multiplayerConstraints = GridBagConstraints()
-	multiplayerPanel.layout = multiplayerGridBag
-
-	val backFromMp = Button("Back")
-	backFromMp.addActionListener {
-		toggleMenuPanels(
-			mmPanel = true , spPanel = false , mpPanel = false ,
-			cwPanel = false ,
-			awPanel = false
-		)
-	}
-	backFromMp.size = Dimension(60 , 30)
-	multiplayerConstraints.gridx = 1
-	multiplayerConstraints.gridy = 2
-	multiplayerPanel.add(backFromMp , multiplayerConstraints)
-}
-
-private fun createMainMenuPanel(mainMenuConstraints : GridBagConstraints) {
+private fun panelCreateMainMenu(mainMenuConstraints : GridBagConstraints) {
 	val title = Label("Macrocosmia: A New Dawn")
 	title.font = Font("Monospace" , Font.PLAIN , 24)
 	mainMenuConstraints.insets = Insets(0 , 0 , 100 , 0)
@@ -93,10 +74,15 @@ private fun createMainMenuPanel(mainMenuConstraints : GridBagConstraints) {
 
 	val singlePlayer = Button("SinglePlayer")
 	singlePlayer.addActionListener {
-		toggleMenuPanels(
-			mmPanel = false , spPanel = true , mpPanel = false , cwPanel = false ,
-			awPanel = false
-		)
+		if (checkForWorldFiles()) {
+			toggleMenuPanels(
+				mmPanel = false , spPanel = true , mpPanel = false , cwPanel = false , awPanel = false
+			)
+		} else {
+			toggleMenuPanels(
+				mmPanel = false , spPanel = false , mpPanel = false , cwPanel = true , awPanel = false
+			)
+		}
 	}
 	mainMenuConstraints.insets = Insets(0 , 0 , 0 , 0)
 	mainMenuConstraints.gridx = 1
@@ -106,8 +92,7 @@ private fun createMainMenuPanel(mainMenuConstraints : GridBagConstraints) {
 	val multiplayer = Button("Multiplayer")
 	multiplayer.addActionListener {
 		toggleMenuPanels(
-			mmPanel = false , spPanel = false , mpPanel = true , cwPanel = false ,
-			awPanel = false
+			mmPanel = false , spPanel = false , mpPanel = true , cwPanel = false , awPanel = false
 		)
 	}
 	mainMenuConstraints.gridx = 1
@@ -122,7 +107,7 @@ private fun createMainMenuPanel(mainMenuConstraints : GridBagConstraints) {
 	mainMenuPanel.add(exit , mainMenuConstraints)
 }
 
-private fun createSinglePlayerPanel() {
+private fun panelCreateSinglePlayer() {
 	val singlePlayerGridBag = GridBagLayout()
 	val singlePlayerConstraints = GridBagConstraints()
 	singlePlayerPanel.layout = singlePlayerGridBag
@@ -149,8 +134,7 @@ private fun createSinglePlayerPanel() {
 	val back = Button("Back")
 	back.addActionListener {
 		toggleMenuPanels(
-			mmPanel = true , spPanel = false , mpPanel = false , cwPanel = false ,
-			awPanel = false
+			mmPanel = true , spPanel = false , mpPanel = false , cwPanel = false , awPanel = false
 		)
 	}
 	back.size = Dimension(60 , 30)
@@ -159,54 +143,7 @@ private fun createSinglePlayerPanel() {
 	singlePlayerPanel.add(back , singlePlayerConstraints)
 }
 
-private fun getCreatedWorlds() {
-	for (i in allWorldsPanel.components)
-		allWorldsPanel.remove(i)
-
-	val files = File(savableWorld.getPath()).listFiles()
-	for (i in files.indices) {
-		if (! files[i].name.contains(".json"))
-			continue
-		val file = FileReader("${savableWorld.getPath()}${files[i].name}").readText()
-		val saveFile : JSONObject = JSONObject(file)
-
-		val name = saveFile.getString("name")
-		val power = saveFile.getString("power")
-		val size = saveFile.getString("size")
-		val difficulty = saveFile.getString("difficulty")
-		val seed = saveFile.getString("seed")
-		val intSeed = seed.slice(IntRange(6 , seed.length - 1)).toIntOrNull()
-		if (intSeed !is Int)
-			continue
-
-		allWorldsPanel.size = Dimension(400 , 300)
-		createNewWorldButton(saveFile , i)
-	}
-}
-
-fun createNewWorldButton(save : JSONObject , yPos : Int) {
-	val constraints = GridBagConstraints()
-	val layout = GridBagLayout()
-	oneWorldPanel.layout = layout
-
-	val name = Label(save.getString("name"))
-	oneWorldPanel.add(name , constraints)
-
-	val seed = Label(save.getString("seed"))
-	constraints.gridy = 1
-	oneWorldPanel.add(seed , constraints)
-
-	val selectWorldForPlay = Button("Select")
-	selectWorldForPlay.addActionListener { print("Playing: $save.getString('name')") }
-	constraints.gridx = 1
-	constraints.gridy = 0
-	oneWorldPanel.add(selectWorldForPlay , constraints)
-
-//	oneWorldPanel.location = Point(0 , yPos * 100)
-	allWorldsPanel.add(oneWorldPanel)
-}
-
-private fun createWorldPanel() {
+private fun panelCreateNewWorld() {
 	// savableWorld creation
 	val worldCreateGridBag = GridBagLayout()
 	val worldCreateConstraints = GridBagConstraints()
@@ -304,13 +241,14 @@ private fun createWorldPanel() {
 
 	val backToWorlds = Button("Back")
 	backToWorlds.addActionListener {
-		toggleMenuPanels(
+		if (checkForWorldFiles()) toggleMenuPanels(
 			mmPanel = false ,
 			spPanel = true ,
 			mpPanel = false ,
 			cwPanel = false ,
 			awPanel = false
 		)
+		else toggleMenuPanels(mmPanel = true , spPanel = false , mpPanel = false , cwPanel = false , awPanel = false)
 	}
 	worldCreateConstraints.gridx = 0
 	worldCreateConstraints.gridy = 5
@@ -321,6 +259,70 @@ private fun createWorldPanel() {
 	worldCreateConstraints.gridx = 5
 	createWorldPanel.add(createWorld , worldCreateConstraints)
 }
+
+private fun panelCreateMultiplayer() {
+	val multiplayerGridBag = GridBagLayout()
+	val multiplayerConstraints = GridBagConstraints()
+	multiplayerPanel.layout = multiplayerGridBag
+
+	val backFromMp = Button("Back")
+	backFromMp.addActionListener {
+		toggleMenuPanels(
+			mmPanel = true , spPanel = false , mpPanel = false , cwPanel = false , awPanel = false
+		)
+	}
+	backFromMp.size = Dimension(60 , 30)
+	multiplayerConstraints.gridx = 1
+	multiplayerConstraints.gridy = 2
+	multiplayerPanel.add(backFromMp , multiplayerConstraints)
+}
+
+
+private fun getCreatedWorlds() {
+	val files = File(savableWorld.getPath()).listFiles()
+	if (files != null) {
+		for (i in files.indices) {
+			// making sure the file is a json
+			if (! files[i].name.contains(".json")) continue
+
+			val file = FileReader(savableWorld.getPath() + files[i].name).readText()
+			val saveFile = JSONObject(file)
+
+			// making sure it has a valid seed
+			val seed = saveFile.getString("seed")
+			val intSeed = seed.slice(IntRange(6 , seed.length - 1)).toIntOrNull()
+			if (intSeed !is Int) continue
+
+			playWorldFileButton(saveFile)
+		}
+	}
+}
+
+fun playWorldFileButton(save : JSONObject) {
+	val constraints = GridBagConstraints()
+	val layout = GridBagLayout()
+	val oneWorldPanel = JPanel()
+	oneWorldPanel.layout = layout
+
+
+	val selectWorldForPlay = Button("Select")
+	selectWorldForPlay.addActionListener { savableWorld.getWorldSettings(save.getString("name")) }
+	constraints.gridx = 1
+	constraints.gridy = 0
+	oneWorldPanel.add(selectWorldForPlay , constraints)
+
+	val name = Label(save.getString("name"))
+	constraints.gridy = 1
+	oneWorldPanel.add(name , constraints)
+
+	val seed = Label(save.getString("seed"))
+	constraints.gridy = 2
+	oneWorldPanel.add(seed , constraints)
+
+
+	allWorldsPanel.add(oneWorldPanel)
+}
+
 
 fun toggleMenuPanels(
 	mmPanel : Boolean ,
@@ -353,10 +355,24 @@ fun toggleMenuPanels(
 		awPanel   -> singlePlayerPanel.add(createWorldPanel)
 	}
 
-	validate()
-}
-
-fun validate() {
 	window.revalidate()
 	window.repaint()
+}
+
+private fun checkForWorldFiles() : Boolean {
+	var hasWorlds = false
+
+	val files = File(savableWorld.getPath()).listFiles()
+	for (i in files !!) {
+		if (! i.name.contains(".json")) continue
+
+		val file = FileReader(savableWorld.getPath() + i.name).readText()
+		val saveFile = JSONObject(file)
+
+		// making sure it has a valid seed
+		val seed = saveFile.getString("seed")
+		val intSeed = seed.slice(IntRange(6 , seed.length - 1)).toIntOrNull()
+		if (intSeed is Int) hasWorlds = true
+	}
+	return hasWorlds
 }
