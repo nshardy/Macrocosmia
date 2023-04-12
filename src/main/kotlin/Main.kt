@@ -12,13 +12,13 @@ import kotlin.system.exitProcess
 // variables
 var width : Int = 700
 var height : Int = 550
-val window = JFrame()
-val mainMenuPanel = JPanel()
-val singlePlayerPanel = JPanel()
-val createWorldPanel = JPanel()
-val allWorldsPanel = ScrollPane()
-val oneWorldPanel = JPanel()
-val multiplayerPanel = JPanel()
+val window : JFrame = JFrame()
+val mainMenuPanel  : JPanel = JPanel()
+val singlePlayerPanel  : JPanel = JPanel()
+val createWorldPanel  : JPanel = JPanel()
+val allWorldsPanel : ScrollPane = ScrollPane()
+val oneWorldPanel  : JPanel = JPanel()
+val multiplayerPanel : JPanel = JPanel()
 val icon : Image = ImageIO.read(File("src/main/resources/sprites/Icon.png"))
 val scaledIcon : Image = icon.getScaledInstance(128 , 128 , Image.SCALE_SMOOTH)
 var savableWorld : SavableWorld = SavableWorld()
