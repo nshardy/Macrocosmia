@@ -24,7 +24,7 @@ class SavableWorld {
 
 
 	// functions
-	fun loadWorld(worldToLoad : String) {
+	fun getWorldSettings(worldToLoad : String) {
 		val file = FileReader("${getPath()}/${worldToLoad}.json").readText()
 		val saveFile : JSONObject = JSONObject(file)
 
@@ -48,12 +48,12 @@ class SavableWorld {
 			osName.contains("Windows") -> return System.getProperty("user.home") + "\\Documents\\Macrocosmia\\worlds\\"
 			osName.contains("Mac")     -> return System.getProperty("user.home") + "/Documents/Macrocosmia/worlds/"
 		}
+
 		return ""
 	}
 
 	fun saveWorld() {
 		var path : String = getPath()
-
 
 		// creating the json
 		val json = JSONObject()
@@ -90,11 +90,12 @@ class SavableWorld {
 			e.printStackTrace()
 		}
 
-		loadWorld(worldName)
+		// loading the world
+		getWorldSettings(worldName)
 	}
 
-	fun setDifficulty(button : Button) {
-		when (button.label) {
+	fun setDifficulty(b : Button) {
+		when (b.label) {
 			"Nomad"        -> WorldDifficulty = worldDifficulty.Nomad
 			"Serene"       -> WorldDifficulty = worldDifficulty.Serene
 			"Grim"         -> WorldDifficulty = worldDifficulty.Grim
@@ -103,34 +104,32 @@ class SavableWorld {
 		}
 	}
 
-	fun setPower(button : Button) {
-		when (button.label) {
+	fun setPower(b : Button) {
+		when (b.label) {
 			"Fear"        -> WorldPower = worldPower.Fear
 			"Desperation" -> WorldPower = worldPower.Desperation
 		}
 	}
 
-	fun setSize(button : Button) {
-		when (button.label) {
+	fun setSize(b : Button) {
+		when (b.label) {
 			"Small"  -> WorldSize = worldSize.Small
 			"Medium" -> WorldSize = worldSize.Medium
 			"Large"  -> WorldSize = worldSize.Large
 		}
 	}
 
-	fun setSeed(textField : TextField) {
-		val regex = Regex(pattern = "0-9")
-		val result = regex.replace(textField.text , "")
+	fun setSeed(field : TextField) {
+		if (field.text.length >= 11)
+			field.text = field.text.slice(IntRange(11 , field.text.length - 1))
 
-		this.intWorldSeed = result.toInt()
-		textField.text = result
+		field.text = field.text.replace(Regex("[^0-9]") , "")
+		this.intWorldSeed = if (field.text == "") 0 else field.text.toInt()
 	}
 
-	fun setName(textField : TextField) {
-		val regex = Regex(pattern = "A-Za-z0-9\\s")
-		val result = regex.replace(textField.text , "")
+	fun setName(field : TextField) {
+		field.text = field.text.replace(Regex("[^a-zA-Z0-9\\s]") , "")
 
-		worldName = result
-		textField.text = result
+		worldName = field.text
 	}
 }
