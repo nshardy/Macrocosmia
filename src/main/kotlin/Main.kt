@@ -15,12 +15,14 @@ var height : Int = 550
 val window : JFrame = JFrame()
 val mainMenuPanel : JPanel = JPanel()
 val singlePlayerPanel : JPanel = JPanel()
-val createWorldPanel : JPanel = JPanel()
+var createWorldPanel : JPanel = JPanel()
 val allWorldsPanel : ScrollPane = ScrollPane()
 val multiplayerPanel : JPanel = JPanel()
 val icon : Image = ImageIO.read(File("src/main/resources/sprites/Icon.png"))
 val scaledIcon : Image = icon.getScaledInstance(128 , 128 , Image.SCALE_SMOOTH)
 var savableWorld : SavableWorld = SavableWorld()
+
+var worldContainer : JPanel = JPanel()
 
 
 // functions
@@ -30,20 +32,16 @@ fun main() {
 	window.size = Dimension(width , height)
 	window.iconImage = scaledIcon
 
-	try {
-		window.iconImage = scaledIcon
-		if (System.getProperty("os.name").startsWith("Mac") || System.getProperty("os.name").startsWith("Darwin")) {
-			val taskbar = Taskbar.getTaskbar()
-			try {
-				taskbar.iconImage = scaledIcon
-			} catch (e : UnsupportedOperationException) {
-				println("Can't set taskbar icon.")
-			} catch (e : SecurityException) {
-				println("WARNING! Can't set taskbar icon due to security exceptions.")
-			}
+	if (System.getProperty("os.name").startsWith("Mac") || System.getProperty("os.name").startsWith("Darwin")) {
+		val taskbar = Taskbar.getTaskbar()
+
+		try {
+			taskbar.iconImage = scaledIcon
+		} catch (e : UnsupportedOperationException) {
+			println("Can't set taskbar icon due to UnsupportedOperationException.")
+		} catch (e : SecurityException) {
+			println("Can't set taskbar icon due to SecurityExceptions.")
 		}
-	} catch (e : NullPointerException) {
-		e.printStackTrace()
 	}
 
 	UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
@@ -57,7 +55,6 @@ fun main() {
 	panelCreateMultiplayer()
 	panelCreateNewWorld()
 
-	allWorldsPanel.size = Dimension(400 , 300)
 
 	toggleMenuPanels(mmPanel = true , spPanel = false , mpPanel = false , cwPanel = false , awPanel = false)
 	window.setLocationRelativeTo(null)
@@ -118,10 +115,10 @@ private fun panelCreateSinglePlayer() {
 	singlePlayerConstraints.gridy = - 1
 	singlePlayerPanel.add(worldsTitle , singlePlayerConstraints)
 
+	allWorldsPanel.size = Dimension(500 , 300)
 	singlePlayerPanel.add(allWorldsPanel , singlePlayerConstraints)
 	singlePlayerConstraints.gridx = 0
 	singlePlayerConstraints.gridy = 1
-	getCreatedWorlds()
 
 	val backButton = Button("Create new World")
 	backButton.addActionListener {
@@ -145,6 +142,7 @@ private fun panelCreateSinglePlayer() {
 
 private fun panelCreateNewWorld() {
 	// savableWorld creation
+	createWorldPanel = JPanel()
 	val worldCreateGridBag = GridBagLayout()
 	val worldCreateConstraints = GridBagConstraints()
 	createWorldPanel.layout = worldCreateGridBag
@@ -154,9 +152,9 @@ private fun panelCreateNewWorld() {
 	worldCreateConstraints.gridy = 0
 	worldCreateConstraints.gridx = 2
 	createWorldPanel.add(worldNameLabel , worldCreateConstraints)
-	val worldNameInput = TextField("Name of World...")
-	savableWorld.setName(worldNameInput)
-	worldNameInput.addTextListener { savableWorld.setName(worldNameInput) }
+	val worldNameInput = TextField("Name of world")
+	savableWorld.setSaveName(worldNameInput)
+	worldNameInput.addTextListener { savableWorld.setSaveName(worldNameInput) }
 	worldCreateConstraints.gridx = 3
 	createWorldPanel.add(worldNameInput , worldCreateConstraints)
 
@@ -167,8 +165,8 @@ private fun panelCreateNewWorld() {
 	val worldSeedInput = TextField("1000000000")
 	worldCreateConstraints.gridx = 3
 	worldSeedInput.text = "${(Math.random() * 1000000000).toInt()}"
-	savableWorld.setSeed(worldSeedInput)
-	worldSeedInput.addTextListener { savableWorld.setSeed(worldSeedInput) }
+	savableWorld.setSaveSeed(worldSeedInput)
+	worldSeedInput.addTextListener { savableWorld.setSaveSeed(worldSeedInput) }
 	createWorldPanel.add(worldSeedInput , worldCreateConstraints)
 
 
@@ -178,27 +176,27 @@ private fun panelCreateNewWorld() {
 	createWorldPanel.add(worldDifficultyLabel , worldCreateConstraints)
 
 	val worldDifficultyLowest = Button("Nomad")
-	worldDifficultyLowest.addActionListener { savableWorld.setDifficulty(worldDifficultyLowest) }
+	worldDifficultyLowest.addActionListener { savableWorld.setSaveDifficulty(worldDifficultyLowest) }
 	worldCreateConstraints.gridx = 1
 	createWorldPanel.add(worldDifficultyLowest , worldCreateConstraints)
 
 	val worldDifficultyLow = Button("Serene")
-	worldDifficultyLow.addActionListener { savableWorld.setDifficulty(worldDifficultyLow) }
+	worldDifficultyLow.addActionListener { savableWorld.setSaveDifficulty(worldDifficultyLow) }
 	worldCreateConstraints.gridx = 2
 	createWorldPanel.add(worldDifficultyLow , worldCreateConstraints)
 
 	val worldDifficultyMedium = Button("Grim")
-	worldDifficultyMedium.addActionListener { savableWorld.setDifficulty(worldDifficultyMedium) }
+	worldDifficultyMedium.addActionListener { savableWorld.setSaveDifficulty(worldDifficultyMedium) }
 	worldCreateConstraints.gridx = 3
 	createWorldPanel.add(worldDifficultyMedium , worldCreateConstraints)
 
 	val worldDifficultyHigh = Button("Insufferable")
-	worldDifficultyHigh.addActionListener { savableWorld.setDifficulty(worldDifficultyHigh) }
+	worldDifficultyHigh.addActionListener { savableWorld.setSaveDifficulty(worldDifficultyHigh) }
 	worldCreateConstraints.gridx = 4
 	createWorldPanel.add(worldDifficultyHigh , worldCreateConstraints)
 
 	val worldDifficultyTooHigh = Button("Legendary")
-	worldDifficultyTooHigh.addActionListener { savableWorld.setDifficulty(worldDifficultyTooHigh) }
+	worldDifficultyTooHigh.addActionListener { savableWorld.setSaveDifficulty(worldDifficultyTooHigh) }
 	worldCreateConstraints.gridx = 5
 	createWorldPanel.add(worldDifficultyTooHigh , worldCreateConstraints)
 
@@ -209,17 +207,17 @@ private fun panelCreateNewWorld() {
 	createWorldPanel.add(worldSizeLabel , worldCreateConstraints)
 
 	val worldSizeSmall = Button("Small")
-	worldSizeSmall.addActionListener { savableWorld.setSize(worldSizeSmall) }
+	worldSizeSmall.addActionListener { savableWorld.setSaveSize(worldSizeSmall) }
 	worldCreateConstraints.gridx = 1
 	createWorldPanel.add(worldSizeSmall , worldCreateConstraints)
 
 	val worldSizeMedium = Button("Medium")
-	worldSizeMedium.addActionListener { savableWorld.setSize(worldSizeMedium) }
+	worldSizeMedium.addActionListener { savableWorld.setSaveSize(worldSizeMedium) }
 	worldCreateConstraints.gridx = 2
 	createWorldPanel.add(worldSizeMedium , worldCreateConstraints)
 
 	val worldSizeLarge = Button("Large")
-	worldSizeLarge.addActionListener { savableWorld.setSize(worldSizeLarge) }
+	worldSizeLarge.addActionListener { savableWorld.setSaveSize(worldSizeLarge) }
 	worldCreateConstraints.gridx = 3
 	createWorldPanel.add(worldSizeLarge , worldCreateConstraints)
 
@@ -229,12 +227,12 @@ private fun panelCreateNewWorld() {
 	createWorldPanel.add(worldPowerLabel , worldCreateConstraints)
 
 	val worldPowerFear = Button("Fear")
-	worldPowerFear.addActionListener { savableWorld.setPower(worldPowerFear) }
+	worldPowerFear.addActionListener { savableWorld.setSavePower(worldPowerFear) }
 	worldCreateConstraints.gridx = 1
 	createWorldPanel.add(worldPowerFear , worldCreateConstraints)
 
 	val worldPowerDesperation = Button("Desperation")
-	worldPowerDesperation.addActionListener { savableWorld.setPower(worldPowerDesperation) }
+	worldPowerDesperation.addActionListener { savableWorld.setSavePower(worldPowerDesperation) }
 	worldCreateConstraints.gridx = 2
 	createWorldPanel.add(worldPowerDesperation , worldCreateConstraints)
 
@@ -255,7 +253,7 @@ private fun panelCreateNewWorld() {
 	createWorldPanel.add(backToWorlds , worldCreateConstraints)
 
 	val createWorld = Button("Create world")
-	createWorld.addActionListener { savableWorld.saveWorld() }
+	createWorld.addActionListener { savableWorld.saveWorldToFile() }
 	worldCreateConstraints.gridx = 5
 	createWorldPanel.add(createWorld , worldCreateConstraints)
 }
@@ -275,52 +273,6 @@ private fun panelCreateMultiplayer() {
 	multiplayerConstraints.gridx = 1
 	multiplayerConstraints.gridy = 2
 	multiplayerPanel.add(backFromMp , multiplayerConstraints)
-}
-
-
-private fun getCreatedWorlds() {
-	val files = File(savableWorld.getPath()).listFiles()
-	if (files != null) {
-		for (i in files.indices) {
-			// making sure the file is a json
-			if (! files[i].name.contains(".json")) continue
-
-			val file = FileReader(savableWorld.getPath() + files[i].name).readText()
-			val saveFile = JSONObject(file)
-
-			// making sure it has a valid seed
-			val seed = saveFile.getString("seed")
-			val intSeed = seed.slice(IntRange(6 , seed.length - 1)).toIntOrNull()
-			if (intSeed !is Int) continue
-
-			playWorldFileButton(saveFile)
-		}
-	}
-}
-
-fun playWorldFileButton(save : JSONObject) {
-	val constraints = GridBagConstraints()
-	val layout = GridBagLayout()
-	val oneWorldPanel = JPanel()
-	oneWorldPanel.layout = layout
-
-
-	val selectWorldForPlay = Button("Select")
-	selectWorldForPlay.addActionListener { savableWorld.getWorldSettings(save.getString("name")) }
-	constraints.gridx = 1
-	constraints.gridy = 0
-	oneWorldPanel.add(selectWorldForPlay , constraints)
-
-	val name = Label(save.getString("name"))
-	constraints.gridy = 1
-	oneWorldPanel.add(name , constraints)
-
-	val seed = Label(save.getString("seed"))
-	constraints.gridy = 2
-	oneWorldPanel.add(seed , constraints)
-
-
-	allWorldsPanel.add(oneWorldPanel)
 }
 
 
@@ -348,7 +300,10 @@ fun toggleMenuPanels(
 	}
 	when {
 		! cwPanel -> window.remove(createWorldPanel)
-		cwPanel   -> window.add(createWorldPanel)
+		cwPanel   -> {
+			panelCreateNewWorld()
+			window.add(createWorldPanel)
+		}
 	}
 	when {
 		! awPanel -> singlePlayerPanel.remove(createWorldPanel)
@@ -374,5 +329,65 @@ private fun checkForWorldFiles() : Boolean {
 		val intSeed = seed.slice(IntRange(6 , seed.length - 1)).toIntOrNull()
 		if (intSeed is Int) hasWorlds = true
 	}
+
 	return hasWorlds
+}
+
+private fun getCreatedWorlds() {
+	for (i in worldContainer.components) {
+		worldContainer.remove(i)
+	}
+
+	val files = File(savableWorld.getPath()).listFiles()
+	if (files != null) {
+		for (i in files.indices) {
+			// making sure the file is a json
+			if (! files[i].name.contains(".json")) continue
+
+			val file = FileReader(savableWorld.getPath() + files[i].name).readText()
+			val saveFile = JSONObject(file)
+
+			// making sure it has a valid seed
+			val seedCheck = saveFile.getString("seed")
+			val intSeed = seedCheck.slice(IntRange(6 , seedCheck.length - 1)).toIntOrNull()
+			if (intSeed !is Int) continue
+
+			createWorldInfo(saveFile , i)
+		}
+
+		allWorldsPanel.add(worldContainer)
+	}
+}
+
+fun createWorldInfo(saveFile : JSONObject , i : Int) {
+	// creating the single world
+	val con = GridBagConstraints()
+	val lay = GridBagLayout()
+	val singleWorld = JPanel()
+	singleWorld.layout = lay
+
+
+	val selectWorldForPlay = Button("Select")
+	selectWorldForPlay.addActionListener { savableWorld.getSaveFileSettings(saveFile.getString("name")) }
+	con.gridx = 1
+	con.gridy = 0
+	singleWorld.add(selectWorldForPlay , con)
+
+	val name = Label(saveFile.getString("name"))
+	con.gridy = 1
+	singleWorld.add(name , con)
+
+	val seed = Label("seed")
+	con.gridy = 2
+	singleWorld.add(seed , con)
+
+
+	val viewportCon = GridBagConstraints()
+	val viewportLay = GridBagLayout()
+	worldContainer.layout = viewportLay
+	viewportCon.gridx = 0
+	viewportCon.gridy = i * 100
+	worldContainer.maximumSize = Dimension(500 , 300)
+
+	worldContainer.add(singleWorld , viewportCon)
 }
