@@ -10,116 +10,111 @@ import javax.swing.JOptionPane
 
 class SavableWorld {
 	// variables
-	var worldName : String = ""
-	var worldSeed : String = ""
-	var intWorldSeed : Int = 0
+	private var saveName : String = ""
+	private var intWorldSeed : Int = 0
 
-	enum class worldPower { Fear , Desperation }
-	enum class worldSize { Small , Medium , Large }
-	enum class worldDifficulty { Nomad , Serene , Grim , Insufferable , Legendary }
+	enum class WorldPower { Fear , Desperation }
+	enum class WorldSize { Small , Medium , Large }
+	enum class WorldDifficulty { Nomad , Serene , Grim , Insufferable , Legendary }
 
-	var WorldPower : worldPower = worldPower.Fear
-	var WorldSize : worldSize = worldSize.Small
-	var WorldDifficulty : worldDifficulty = worldDifficulty.Nomad
+	private var chosenWorldPower : WorldPower = WorldPower.Fear
+	private var chosenWorldSize : WorldSize = WorldSize.Small
+	private var chosenWorldDifficulty : WorldDifficulty = WorldDifficulty.Nomad
 
 
 	// functions
-	fun getWorldSettings(worldToLoad : String) {
-		val file = FileReader("${getPath()}/${worldToLoad}.json").readText()
-		val saveFile : JSONObject = JSONObject(file)
+	fun getSaveFileSettings(worldToLoad : String) {
+		val file = FileReader(getPath() + "${worldToLoad}.json").readText()
+		val saveFile = JSONObject(file)
 
+		println()
 		val name = saveFile.getString("name")
-		println(name)
+		println("Name: $name")
 		val power = saveFile.getString("power")
-		println(power)
+		println("Power: $power")
 		val size = saveFile.getString("size")
-		println(size)
+		println("Size: $size")
 		val difficulty = saveFile.getString("difficulty")
-		println(difficulty)
+		println("Difficulty: $difficulty")
 		val seed = saveFile.getString("seed")
-		println(seed)
-		val intSeed = seed.slice(IntRange(6 , seed.length - 1))
-		println(intSeed)
+		println("Seed: $seed")
 	}
 
 	fun getPath() : String {
 		val osName : String = System.getProperty("os.name")
 		when {
-			osName.contains("Windows") -> return System.getProperty("user.home") + "\\Documents\\Macrocosmia\\worlds\\"
-			osName.contains("Mac")     -> return System.getProperty("user.home") + "/Documents/Macrocosmia/worlds/"
+			osName.startsWith("Windows") -> return System.getProperty("user.home") + "\\Documents\\Macrocosmia\\worlds\\"
+			osName.startsWith("Mac")     -> return System.getProperty("user.home") + "/Documents/Macrocosmia/worlds/"
 		}
 
-		return ""
+		throw Exception("Operating System not supported")
 	}
 
-	fun saveWorld() {
-		var path : String = getPath()
+	fun saveWorldToFile() {
+		val path : String = getPath()
 
 		// creating the json
 		val json = JSONObject()
 		try {
 			json.run {
-				put("name" , worldName)
-				put("power" , WorldPower)
-				put("size" , WorldSize)
-				put("difficulty" , WorldDifficulty)
+				put("name" , saveName)
+				put("power" , chosenWorldPower)
+				put("size" , chosenWorldSize)
+				put("difficulty" , chosenWorldDifficulty)
 				put(
 					"seed" ,
-					"${WorldPower.ordinal}.${WorldSize.ordinal}.${WorldDifficulty.ordinal}.${
+					"${chosenWorldPower.ordinal}.${chosenWorldSize.ordinal}.${chosenWorldDifficulty.ordinal}.${
 						if (intWorldSeed == 0) (Math.random() * 1000000000).toInt() else intWorldSeed
 					}"
 				)
 			}
-		} catch (e : JSONException) {
-			e.printStackTrace()
+		} catch (exc : JSONException) {
+			exc.printStackTrace()
 		}
 
 		// creating the file
 		try {
 			PrintWriter(
 				FileWriter(
-					"$path$worldName.json" ,
+					"$path$saveName.json" ,
 					Charset.defaultCharset()
 				)
 			).use { it.write(json.toString(2)) }
-			JOptionPane.showMessageDialog(
-				window ,
-				"SavableWorld created!\nName: [$worldName]\nLocation: $path$worldName.json\""
-			)
-		} catch (e : Exception) {
-			e.printStackTrace()
+			toggleMenuPanels(mmPanel = false , spPanel = true , mpPanel = false , cwPanel = false , awPanel = false)
+		} catch (exc : Exception) {
+			exc.printStackTrace()
 		}
 
 		// loading the world
-		getWorldSettings(worldName)
+		getSaveFileSettings(saveName)
 	}
 
-	fun setDifficulty(b : Button) {
+	fun setSaveDifficulty(b : Button) {
 		when (b.label) {
-			"Nomad"        -> WorldDifficulty = worldDifficulty.Nomad
-			"Serene"       -> WorldDifficulty = worldDifficulty.Serene
-			"Grim"         -> WorldDifficulty = worldDifficulty.Grim
-			"Insufferable" -> WorldDifficulty = worldDifficulty.Insufferable
-			"Legendary"    -> WorldDifficulty = worldDifficulty.Legendary
+			"Nomad"        -> chosenWorldDifficulty = WorldDifficulty.Nomad
+			"Serene"       -> chosenWorldDifficulty = WorldDifficulty.Serene
+			"Grim"         -> chosenWorldDifficulty = WorldDifficulty.Grim
+			"Insufferable" -> chosenWorldDifficulty = WorldDifficulty.Insufferable
+			"Legendary"    -> chosenWorldDifficulty = WorldDifficulty.Legendary
 		}
 	}
 
-	fun setPower(b : Button) {
+	fun setSavePower(b : Button) {
 		when (b.label) {
-			"Fear"        -> WorldPower = worldPower.Fear
-			"Desperation" -> WorldPower = worldPower.Desperation
+			"Fear"        -> chosenWorldPower = WorldPower.Fear
+			"Desperation" -> chosenWorldPower = WorldPower.Desperation
 		}
 	}
 
-	fun setSize(b : Button) {
+	fun setSaveSize(b : Button) {
 		when (b.label) {
-			"Small"  -> WorldSize = worldSize.Small
-			"Medium" -> WorldSize = worldSize.Medium
-			"Large"  -> WorldSize = worldSize.Large
+			"Small"  -> chosenWorldSize = WorldSize.Small
+			"Medium" -> chosenWorldSize = WorldSize.Medium
+			"Large"  -> chosenWorldSize = WorldSize.Large
 		}
 	}
 
-	fun setSeed(field : TextField) {
+	fun setSaveSeed(field : TextField) {
 		if (field.text.length >= 11)
 			field.text = field.text.slice(IntRange(11 , field.text.length - 1))
 
@@ -127,9 +122,8 @@ class SavableWorld {
 		this.intWorldSeed = if (field.text == "") 0 else field.text.toInt()
 	}
 
-	fun setName(field : TextField) {
+	fun setSaveName(field : TextField) {
 		field.text = field.text.replace(Regex("[^a-zA-Z0-9\\s]") , "")
-
-		worldName = field.text
+		saveName = field.text
 	}
 }
