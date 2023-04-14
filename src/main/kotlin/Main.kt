@@ -339,6 +339,7 @@ private fun getCreatedWorlds() {
 	}
 
 	val files = File(savableWorld.getPath()).listFiles()
+	files.sort()
 	if (files != null) {
 		for (i in files.indices) {
 			// making sure the file is a json
@@ -366,6 +367,10 @@ fun createWorldInfo(saveFile : JSONObject , i : Int) {
 	val singleWorld = JPanel()
 	singleWorld.layout = lay
 
+	val viewportCon = GridBagConstraints()
+	val viewportLay = GridBagLayout()
+	worldContainer.layout = viewportLay
+
 
 	val selectWorldForPlay = Button("Select")
 	selectWorldForPlay.addActionListener { savableWorld.getSaveFileSettings(saveFile.getString("name")) }
@@ -374,20 +379,17 @@ fun createWorldInfo(saveFile : JSONObject , i : Int) {
 	singleWorld.add(selectWorldForPlay , con)
 
 	val name = Label(saveFile.getString("name"))
+	name.size = Dimension(400 , name.size.height)
 	con.gridy = 1
 	singleWorld.add(name , con)
 
-	val seed = Label("seed")
+	val seed = Label(saveFile.getString("seed"))
 	con.gridy = 2
 	singleWorld.add(seed , con)
 
-
-	val viewportCon = GridBagConstraints()
-	val viewportLay = GridBagLayout()
-	worldContainer.layout = viewportLay
 	viewportCon.gridx = 0
-	viewportCon.gridy = i * 100
-	worldContainer.maximumSize = Dimension(500 , 300)
-
+	viewportCon.gridy = i
+	print(saveFile.getString("name"))
+	println(" " + viewportCon.gridy)
 	worldContainer.add(singleWorld , viewportCon)
 }
