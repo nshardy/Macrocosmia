@@ -1,11 +1,14 @@
 {
-    "configurations": [
-        {
-            "type": "gradle",
-            "name": "Run Macrocosmia",
-            "tasks": [
-                "run"
-            ]
-        }
-    ]
+	"configurations": [
+		{
+			"type": "gradle",
+			"name": "Run App",
+			"tasks": [
+				"run"
+			],
+			"args": [
+				"--stacktrace"
+			]
+		}
+	]
 }

@@ -9,7 +9,7 @@ import javax.swing.JOptionPane
 import javax.swing.JPanel
 import kotlin.system.exitProcess
 
-class MenuPanel : JPanel() {
+class SinglePlayerPanel : JPanel() {
 	init {
 		val mainMenuGridBag = GridBagLayout()
 		val mainMenuConstraints = GridBagConstraints()
